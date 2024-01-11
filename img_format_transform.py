@@ -13,7 +13,7 @@ target_total_pixels = 1000000
 dataset_root = "/home/yjq/dataset80%"
 
 # 设置输出目录
-output_root = "/home/yjq/dataset_augmentation"
+output_root = "/home/yjq/dataset80%"
 
 for category_folder in os.listdir(dataset_root):
     category_folder_path = os.path.join(dataset_root, category_folder)
@@ -22,18 +22,18 @@ for category_folder in os.listdir(dataset_root):
 
     if os.path.isdir(category_folder_path):
         print(f"Processing category: {category_folder}")
-        # if category_folder == "00_负样本":
-        # 遍历类别文件夹中的图片
+
+    # 遍历类别文件夹中的图片
     for filename in os.listdir(category_folder_path):
         file_path = os.path.join(category_folder_path, filename)
         output_filename = os.path.join(output_folder_path, filename)
         if os.path.isfile(file_path):
             image = Image.open(file_path)
             output_filename = os.path.join(output_folder_path, filename)
-            if os.path.exists(output_filename):
-                continue
+            # if os.path.exists(output_filename):
+            #     continue
             if (image.width * image.height) < target_total_pixels:
-                image.save(output_filename, format="JPEG", quality=80)
+                continue
             else:
                 scale_factor = (
                     target_total_pixels / (image.width * image.height)

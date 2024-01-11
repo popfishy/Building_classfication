@@ -37,13 +37,14 @@ labels = [
     "20_校主楼",
 ]
 
-max_num = 500
+max_num = 1000
 
 transform = A.Compose(
     [
         A.RGBShift(r_shift_limit=5, g_shift_limit=5, b_shift_limit=5, p=0.5),
-        A.RandomBrightnessContrast(brightness_limit=0.3, contrast_limit=0.2, p=0.5),
-        A.ShiftScaleRotate(shift_limit=0.05, scale_limit=0.05, rotate_limit=30, p=1),
+        A.RandomBrightnessContrast(brightness_limit=0.35, contrast_limit=0.2, p=0.5),
+        A.ShiftScaleRotate(shift_limit=0.05, scale_limit=0.05, rotate_limit=20, p=0.5),
+        A.HueSaturationValue(),
         # A.RandomCrop(height=1500, width=3000, p=0.5),
     ]
 )
@@ -65,11 +66,12 @@ for category_folder in os.listdir(dataset_root):
         file_path = os.path.join(category_folder_path, filename)
         filename = filename.split(".")[0]
         if os.path.isfile(file_path):
-            image = Image.open(file_path)
-            image.save(output_folder_path + "/" + filename + ".jpg")
-            image = np.array(image)
             if num_cnt > max_num:
                 continue
+            image = Image.open(file_path)
+            image = image.convert("RGB")
+            image.save(output_folder_path + "/" + filename + ".jpg")
+            image = np.array(image)
             for i in range(3):
                 output_filename = (
                     output_folder_path + "/" + filename + "_" + str(i) + ".jpg"

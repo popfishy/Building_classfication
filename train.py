@@ -12,11 +12,13 @@ import torch.utils.data as tud
 import numpy as np
 import matplotlib.pyplot as plt
 from model.inception_resnet_v2 import Inception_ResNetv2
+import albumentations as A
+from model.vit import ViT
 from torch.utils.tensorboard import SummaryWriter
 
 
 dataset_root = "/home/yjq/dataset_augmentation"
-global_model_name = "Inception_ResNetv2"
+global_model_name = "Vit"
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 writer = SummaryWriter("logs")
 
@@ -30,9 +32,9 @@ dataset = torchvision.datasets.ImageFolder(
     root=dataset_root,
     transform=torchvision.transforms.Compose(
         [
-            # torchvision.transforms.RandomAffine(
-            #     degrees=(-5, 5), translate=(0.08, 0.08), scale=(0.9, 1.1)
-            # ),
+            torchvision.transforms.RandomAffine(
+                degrees=(-5, 5), translate=(0.08, 0.08), scale=(0.9, 1.1)
+            ),
             torchvision.transforms.Resize(300),  # 调整图像短边
             torchvision.transforms.CenterCrop(input_size),
             torchvision.transforms.ToTensor(),
@@ -122,9 +124,10 @@ def test_model(model, test_dataloader, loss_fn):
 # TODO start train
 # model = initialize_model(global_model_name, 20, use_pretrained=True, feature_extract=True)
 model = Inception_ResNetv2()
+model.load_state_dict(torch.load("results/Inception_ResNetv2_50_2.pth"))
 loss_fn = nn.CrossEntropyLoss()
-optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.5)
-num_epochs = 80
+optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.5)
+num_epochs = 50
 best_epoch = 0
 best_acc = 0.95
 test_accuracy_hist = []
