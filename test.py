@@ -15,7 +15,7 @@ import os
 from model.inception_resnet_v2 import Inception_ResNetv2
 import matplotlib.pyplot as plt
 
-model_path = "results/Inception_ResNetv2_40.pth"
+model_path = "results/best.pth"
 datas_path = "验证集1"
 
 target_total_pixels = 1000000
@@ -105,7 +105,15 @@ for filename in test_pic:
                 )
             )
             a = f1.readline()
-            f.write(str(predicted.item()) + "     " + a)
+            a = eval(a)
+            f.write(
+                str(a)
+                + "     "
+                + str(predicted.item())
+                + "   "
+                + str(predicted_value.item())
+                + "\n"
+            )
             if int(a) == int(predicted.item()):
                 cnt = cnt + 1
-print(cnt / 69)
+print(cnt / len(test_pic))
