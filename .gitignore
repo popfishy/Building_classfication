@@ -174,4 +174,5 @@ results/*
 test_data/*
 logs/*
 *.pth
+验证集1
 
