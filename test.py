@@ -13,9 +13,10 @@ import numpy as np
 from PIL import Image
 import os
 from model.inception_resnet_v2 import Inception_ResNetv2
+import matplotlib.pyplot as plt
 
-model_path = "Inception_ResNetv2_40.pth"
-datas_path = "test_data"
+model_path = "results/Inception_ResNetv2_40.pth"
+datas_path = "验证集1"
 
 target_total_pixels = 1000000
 
@@ -57,11 +58,23 @@ transform = torchvision.transforms.Compose(
 # 加载模型
 model = Inception_ResNetv2()
 model.load_state_dict(torch.load(model_path))
+
 model.eval()
 test_pic = []
 for filename in os.listdir(datas_path):
     test_pic.append(filename)
-test_pic = sorted(test_pic)
+
+
+def custom_sort(element):
+    element = element.split(".")[0]
+    sub_string = str(element)[4:]
+    return int(sub_string)
+
+
+f = open("label.txt", "w")
+f1 = open("label(1).txt", "r")
+cnt = 0
+test_pic = sorted(test_pic, key=custom_sort)
 for filename in test_pic:
     file_path = os.path.join(datas_path, filename)
     if os.path.isfile(file_path):
@@ -72,21 +85,27 @@ for filename in test_pic:
             target_width = int(image.width * scale_factor)
             target_height = int(image.height * scale_factor)
             image = image.resize((target_width, target_height), resample=Image.BILINEAR)
+        image = image.convert("RGB")
         image_tensor = transform(image)
         image_tensor = image_tensor.unsqueeze(0)  # 添加批次维度
         # 进行预测
         with torch.no_grad():
             outputs = model(image_tensor)
-            outputs = torch.sigmoid(outputs)
+            outputs = torch.nn.functional.softmax(outputs, dim=1)
             predicted_value, predicted = torch.max(outputs, 1)
-            if predicted_value.item() < 0.4:
-                predicted = 0
-        # 打印预测结果
-        print(
-            "图片名称:{}, 预测结果:{}, 预测概率值:{:.4f}, 预测标签为:{}".format(
-                filename,
-                predicted.item(),
-                predicted_value.item(),
-                labels[predicted.item()],
+            # if (predicted_value.item()) < 0.50:
+            #     predicted = 0
+            # 打印预测结果
+            print(
+                "图片名称:{}, 预测结果:{}, 预测概率值:{:.4f}, 预测标签为:{}".format(
+                    filename,
+                    predicted.item(),
+                    predicted_value.item(),
+                    labels[predicted.item()],
+                )
             )
-        )
+            a = f1.readline()
+            f.write(str(predicted.item()) + "     " + a)
+            if int(a) == int(predicted.item()):
+                cnt = cnt + 1
+print(cnt / 69)
