@@ -5,15 +5,9 @@
 
 import torch
 import torchvision
-import torch.nn as nn
-import torch.optim as optim
-from torchvision import models, transforms
-import torch.utils.data as tud
-import numpy as np
 from PIL import Image
 import os
 from model.inception_resnet_v2 import Inception_ResNetv2
-import matplotlib.pyplot as plt
 
 model_path = "results/best.pth"
 datas_path = "验证集1"
@@ -50,7 +44,6 @@ transform = torchvision.transforms.Compose(
     [
         torchvision.transforms.Resize(300),  # 调整图像短边为256像素
         torchvision.transforms.CenterCrop(input_size),  # 将图像剪裁为224x224像素
-        # torchvision.transforms.Resize(input_size),
         torchvision.transforms.ToTensor(),
     ]
 )
@@ -71,8 +64,9 @@ def custom_sort(element):
     return int(sub_string)
 
 
-f = open("label.txt", "w")
-f1 = open("label(1).txt", "r")
+f = open("compare.txt", "w")
+f1 = open("label.txt", "r")
+f2 = open("results.txt", "w")
 cnt = 0
 test_pic = sorted(test_pic, key=custom_sort)
 for filename in test_pic:
@@ -93,27 +87,34 @@ for filename in test_pic:
             outputs = model(image_tensor)
             outputs = torch.nn.functional.softmax(outputs, dim=1)
             predicted_value, predicted = torch.max(outputs, 1)
-            # if (predicted_value.item()) < 0.50:
-            #     predicted = 0
-            # 打印预测结果
-            print(
-                "图片名称:{}, 预测结果:{}, 预测概率值:{:.4f}, 预测标签为:{}".format(
-                    filename,
-                    predicted.item(),
-                    predicted_value.item(),
-                    labels[predicted.item()],
+            if (predicted_value.item()) < 0.70:
+                print(
+                    "图片：{}预测值为{%.4f}，需要人工辅助判断！\n".format(
+                        filename, predicted_value.item()
+                    )
                 )
-            )
-            a = f1.readline()
-            a = eval(a)
+            # print(
+            #     "图片名称:{}, 预测结果:{}, 预测概率值:{:.4f}, 预测标签为:{}".format(
+            #         filename,
+            #         predicted.item(),
+            #         predicted_value.item(),
+            #         labels[predicted.item()],
+            #     )
+            # )
+            truth_label = f1.readline()
+            truth_label = eval(truth_label)
             f.write(
-                str(a)
+                str(truth_label)
                 + "     "
                 + str(predicted.item())
                 + "   "
                 + str(predicted_value.item())
                 + "\n"
             )
-            if int(a) == int(predicted.item()):
+            f2.write(str(predicted.item()) + "\n")
+            if int(truth_label) == int(predicted.item()):
                 cnt = cnt + 1
+f.close()
+f1.close()
+f2.close()
 print(cnt / len(test_pic))
