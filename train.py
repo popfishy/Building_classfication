@@ -18,7 +18,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 
 dataset_root = "/home/yjq/dataset_augmentation"
-global_model_name = "Vit"
+global_model_name = "Inception_ResNetv2"
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 writer = SummaryWriter("logs")
 
@@ -124,20 +124,17 @@ def test_model(model, test_dataloader, loss_fn):
 # TODO start train
 # model = initialize_model(global_model_name, 20, use_pretrained=True, feature_extract=True)
 model = Inception_ResNetv2()
-model.load_state_dict(torch.load("results/Inception_ResNetv2_50_2.pth"))
+model.load_state_dict(torch.load("results/best.pth"))
 loss_fn = nn.CrossEntropyLoss()
 optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.5)
-num_epochs = 50
+num_epochs = 20
 best_epoch = 0
-best_acc = 0.95
+best_acc = 0.98
 test_accuracy_hist = []
 for epoch in range(num_epochs):
     train_model(model, train_dataloader, loss_fn, optimizer, epoch)
     acc = test_model(model, test_dataloader, loss_fn)
     test_accuracy_hist.append(acc.item())
-    for name, param in model.named_parameters():
-        writer.add_histogram(name, param, epoch)
-        writer.add_histogram(f"{name}.grad", param.grad, epoch)
     if acc > best_acc:
         best_acc = acc
         best_epoch = epoch

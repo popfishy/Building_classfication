@@ -9,7 +9,7 @@ from PIL import Image
 import os
 from model.inception_resnet_v2 import Inception_ResNetv2
 
-model_path = "results/best.pth"
+model_path = "results/Inception_ResNetv2_tuning_best.pth"
 datas_path = "验证集1"
 
 target_total_pixels = 1000000
@@ -64,7 +64,7 @@ def custom_sort(element):
     return int(sub_string)
 
 
-f = open("compare.txt", "w")
+f = open("compare2.txt", "w")
 f1 = open("label.txt", "r")
 f2 = open("results.txt", "w")
 cnt = 0
@@ -89,7 +89,7 @@ for filename in test_pic:
             predicted_value, predicted = torch.max(outputs, 1)
             if (predicted_value.item()) < 0.70:
                 print(
-                    "图片：{}预测值为{%.4f}，需要人工辅助判断！\n".format(
+                    "图片：{},预测值为{:.4f},需要人工辅助判断！\n".format(
                         filename, predicted_value.item()
                     )
                 )
